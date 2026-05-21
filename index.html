@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Pengelolaan Data Sales PGD</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Supabase JS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Sembunyikan elemen secara default untuk SPA */
+        .hidden-section { display: none; }
+        .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen">
+
+    <!-- BAGIAN 1: HALAMAN LOGIN / OTP -->
+    <div id="login-section" class="flex items-center justify-center min-h-screen p-4 hidden-section">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-100">
+            <div class="text-center mb-8">
+                <h1 class="text-2xl font-bold text-blue-800">Portal Pegadaian</h1>
+                <p class="text-sm text-gray-500 mt-2">Login dengan Email Corporate Anda</p>
+            </div>
+
+            <!-- Form Minta OTP -->
+            <form id="form-email" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Email Corporate (@pegadaian.co.id)</label>
+                    <input type="email" id="input-email" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="nama@pegadaian.co.id">
+                </div>
+                <button type="submit" id="btn-send-otp" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+                    Kirim Kode OTP
+                </button>
+            </form>
+
+            <!-- Form Verifikasi OTP (Muncul setelah email dikirim) -->
+            <form id="form-otp" class="space-y-4 hidden mt-4">
+                <div class="bg-green-50 p-3 rounded text-sm text-green-700 border border-green-200">
+                    OTP telah dikirim ke email Anda. Cek kotak masuk atau folder spam.
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Kode OTP (6 Digit)</label>
+                    <input type="text" id="input-otp" required maxlength="6" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 text-center tracking-widest text-lg font-bold" placeholder="••••••">
+                </div>
+                <button type="submit" id="btn-verify-otp" class="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition">
+                    Verifikasi & Masuk
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- BAGIAN 2: DASHBOARD UTAMA -->
+    <div id="app-section" class="hidden-section">
+        <!-- Navbar -->
+        <nav class="bg-blue-800 shadow-md p-4">
+            <div class="container mx-auto flex justify-between items-center">
+                <div class="text-white font-bold text-xl tracking-wide">PGD Portal</div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-blue-100 text-sm hidden md:block" id="user-info">Memuat...</div>
+                    <span id="role-badge" class="px-2 py-1 text-xs font-bold rounded bg-yellow-400 text-yellow-900 uppercase">Role</span>
+                    <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded text-sm font-medium transition">Logout</button>
+                </div>
+            </div>
+        </nav>
+
+        <main class="container mx-auto p-4 md:p-6 mt-4 space-y-6">
+            
+            <!-- FORM INPUT SALES (Akan disembunyikan untuk Admin) -->
+            <div id="sales-form-container" class="bg-white p-6 rounded-xl shadow border border-gray-100">
+                <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Form Data Referral Nasabah</h2>
+                <form id="form-tambah-data" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nama Nasabah</label>
+                        <input type="text" id="nama-nasabah" required class="mt-1 block w-full border border-gray-300 rounded p-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">No KTP (16 Digit)</label>
+                        <input type="text" id="ktp-nasabah" required pattern="\d{16}" title="Harus 16 angka" class="mt-1 block w-full border border-gray-300 rounded p-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">No HP Nasabah</label>
+                        <input type="number" id="hp-nasabah" required class="mt-1 block w-full border border-gray-300 rounded p-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Nilai Transaksi (Pengajuan)</label>
+                        <input type="number" id="nominal-pengajuan" required class="mt-1 block w-full border border-gray-300 rounded p-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="md:col-span-2 flex justify-end mt-2">
+                        <button type="submit" id="btn-submit-data" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition font-medium">Ajukan Data</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- TABEL DATA -->
+            <div class="bg-white rounded-xl shadow border border-gray-100 overflow-hidden">
+                <div class="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg font-bold text-gray-800" id="table-title">Daftar Pengajuan</h2>
+                    <button onclick="loadData()" class="text-blue-600 hover:text-blue-800 text-sm font-medium">↻ Refresh Data</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-gray-100 text-gray-600 uppercase">
+                            <tr>
+                                <th class="p-3 border-b">No</th>
+                                <!-- Kolom Admin -->
+                                <th class="p-3 border-b bg-red-100 text-red-800 hidden admin-col">Nama Sales</th>
+                                <th class="p-3 border-b bg-red-100 text-red-800 hidden admin-col">No HP Sales</th>
+                                
+                                <!-- Kolom Umum -->
+                                <th class="p-3 border-b">Nama Nasabah</th>
+                                <th class="p-3 border-b">No HP Nasabah</th>
+                                
+                                <!-- Kolom Admin -->
+                                <th class="p-3 border-b bg-red-100 text-red-800 hidden admin-col">KTP Nasabah</th>
+                                
+                                <th class="p-3 border-b">Pengajuan (Rp)</th>
+                                
+                                <!-- Kolom Status & Pencairan -->
+                                <th class="p-3 border-b bg-blue-100 text-blue-800">Status</th>
+                                <th class="p-3 border-b bg-blue-100 text-blue-800">Pencairan (Rp)</th>
+                                <th class="p-3 border-b hidden admin-col">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="divide-y divide-gray-200">
+                            <tr><td colspan="10" class="p-6 text-center text-gray-500">Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- LOGIKA JAVASCRIPT -->
+    <script>
+        // ==========================================
+        // 1. KONFIGURASI SUPABASE (GANTI INI!)
+        // ==========================================
+        const SUPABASE_URL = 'https://XXXXXXXX.supabase.co'; // GANTI INI
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5c...'; // GANTI INI
+
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // ==========================================
+        // 2. STATE APLIKASI
+        // ==========================================
+        let currentUser = null;
+        let currentRole = 'sales';
+        let savedEmailForOtp = '';
+
+        // DOM Elements
+        const elLoginSection = document.getElementById('login-section');
+        const elAppSection = document.getElementById('app-section');
+        const elFormEmail = document.getElementById('form-email');
+        const elFormOtp = document.getElementById('form-otp');
+        const elSalesFormContainer = document.getElementById('sales-form-container');
+
+        // Format Rupiah Helper
+        const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
+
+        // ==========================================
+        // 3. INIT & AUTENTIKASI
+        // ==========================================
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                await setupUser(session.user);
+            } else {
+                showSection('login');
+            }
+
+            // Setup Auth Listener (kalau token expired dll)
+            supabase.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_OUT') showSection('login');
+            });
+        }
+
+        function showSection(section) {
+            elLoginSection.style.display = section === 'login' ? 'flex' : 'none';
+            elAppSection.style.display = section === 'app' ? 'block' : 'none';
+        }
+
+        async function setupUser(user) {
+            currentUser = user;
+            
+            // Ambil role dari tabel profiles
+            const { data, error } = await supabase.from('profiles').select('role, nama_lengkap').eq('id', user.id).single();
+            currentRole = data ? data.role : 'sales';
+            const nama = data?.nama_lengkap || user.email;
+
+            // Update UI
+            document.getElementById('user-info').innerText = `${nama} (${user.email})`;
+            document.getElementById('role-badge').innerText = currentRole;
+            document.getElementById('role-badge').className = currentRole === 'admin' 
+                ? 'px-2 py-1 text-xs font-bold rounded bg-red-500 text-white uppercase' 
+                : 'px-2 py-1 text-xs font-bold rounded bg-blue-500 text-white uppercase';
+
+            // Sembunyikan/Tampilkan Form Sales & Kolom Tabel berdasarkan Role
+            if (currentRole === 'admin') {
+                elSalesFormContainer.style.display = 'none';
+                document.getElementById('table-title').innerText = 'Dashboard INTERNAL (Petugas PGD)';
+                document.querySelectorAll('.admin-col').forEach(el => el.classList.remove('hidden'));
+            } else {
+                elSalesFormContainer.style.display = 'block';
+                document.getElementById('table-title').innerText = 'Data Referral (Nasabah) Anda';
+                document.querySelectorAll('.admin-col').forEach(el => el.classList.add('hidden'));
+            }
+
+            showSection('app');
+            loadData();
+        }
+
+        // Handle Request OTP
+        elFormEmail.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-send-otp');
+            const email = document.getElementById('input-email').value;
+            btn.innerHTML = '<span class="spinner"></span> Mengirim...'; btn.disabled = true;
+
+            const { error } = await supabase.auth.signInWithOtp({ email: email });
+            btn.innerHTML = 'Kirim Kode OTP'; btn.disabled = false;
+
+            if (error) {
+                alert('Gagal mengirim OTP: ' + error.message);
+            } else {
+                savedEmailForOtp = email;
+                elFormEmail.classList.add('hidden');
+                elFormOtp.classList.remove('hidden');
+            }
+        });
+
+        // Handle Verify OTP
+        elFormOtp.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-verify-otp');
+            const otp = document.getElementById('input-otp').value;
+            btn.innerHTML = '<span class="spinner"></span> Verifikasi...'; btn.disabled = true;
+
+            const { data: { session }, error } = await supabase.auth.verifyOtp({
+                email: savedEmailForOtp,
+                token: otp,
+                type: 'magiclink' // Type OTP
+            });
+
+            btn.innerHTML = 'Verifikasi & Masuk'; btn.disabled = false;
+
+            if (error) {
+                alert('OTP Salah atau Kadaluarsa!');
+            } else {
+                await setupUser(session.user);
+            }
+        });
+
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
+
+        // ==========================================
+        // 4. DATABASE / CRUD LOGIC
+        // ==========================================
+        
+        // Load Data Table
+        async function loadData() {
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '<tr><td colspan="10" class="p-6 text-center text-gray-500"><span class="spinner"></span> Mengambil data...</td></tr>';
+
+            // Query: Join dengan profiles untuk mengambil data sales (hanya jalan jika Admin RLS membolehkan)
+            const { data, error } = await supabase
+                .from('referrals')
+                .select(`*, profiles(nama_lengkap, no_hp)`)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-red-500">Error: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" class="p-6 text-center text-gray-500">Belum ada data.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50 transition';
+
+                // Status Badge Color
+                let statusBadge = 'bg-yellow-100 text-yellow-800';
+                if(row.status === 'Cair') statusBadge = 'bg-green-100 text-green-800';
+                if(row.status === 'Ditolak') statusBadge = 'bg-red-100 text-red-800';
+
+                // Logika rendering kolom berdasarkan Role
+                if (currentRole === 'admin') {
+                    tr.innerHTML = `
+                        <td class="p-3">${index + 1}</td>
+                        <td class="p-3 bg-red-50">${row.profiles?.nama_lengkap || '-'}</td>
+                        <td class="p-3 bg-red-50">${row.profiles?.no_hp || '-'}</td>
+                        <td class="p-3 font-semibold">${row.nama_nasabah}</td>
+                        <td class="p-3">${row.no_hp_nasabah}</td>
+                        <td class="p-3 bg-red-50">${row.ktp_nasabah}</td>
+                        <td class="p-3">${formatRp(row.nominal_pengajuan)}</td>
+                        <td class="p-3 bg-blue-50">
+                            <select id="status-${row.id}" class="border border-gray-300 rounded p-1 text-sm bg-white focus:ring-blue-500">
+                                <option value="Proses" ${row.status === 'Proses' ? 'selected' : ''}>Proses</option>
+                                <option value="Ditolak" ${row.status === 'Ditolak' ? 'selected' : ''}>Ditolak</option>
+                                <option value="Cair" ${row.status === 'Cair' ? 'selected' : ''}>Cair</option>
+                            </select>
+                        </td>
+                        <td class="p-3 bg-blue-50">
+                            <input type="number" id="cair-${row.id}" value="${row.nominal_pencairan}" class="border border-gray-300 rounded p-1 text-sm w-32 focus:ring-blue-500">
+                        </td>
+                        <td class="p-3">
+                            <button onclick="updateDataAdmin('${row.id}')" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-bold transition">Simpan</button>
+                        </td>
+                    `;
+                } else {
+                    tr.innerHTML = `
+                        <td class="p-3">${index + 1}</td>
+                        <td class="p-3 font-semibold">${row.nama_nasabah}</td>
+                        <td class="p-3">${row.no_hp_nasabah}</td>
+                        <td class="p-3">${formatRp(row.nominal_pengajuan)}</td>
+                        <td class="p-3 bg-blue-50"><span class="px-2 py-1 rounded-full text-xs font-semibold ${statusBadge}">${row.status}</span></td>
+                        <td class="p-3 bg-blue-50 font-bold ${row.status === 'Cair' ? 'text-green-600' : 'text-gray-500'}">
+                            ${row.status === 'Cair' ? formatRp(row.nominal_pencairan) : '-'}
+                        </td>
+                    `;
+                }
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Submit Data Baru (Sales)
+        document.getElementById('form-tambah-data').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-data');
+            btn.innerHTML = '<span class="spinner"></span> Menyimpan...'; btn.disabled = true;
+
+            const newData = {
+                sales_id: currentUser.id,
+                nama_nasabah: document.getElementById('nama-nasabah').value,
+                ktp_nasabah: document.getElementById('ktp-nasabah').value,
+                no_hp_nasabah: document.getElementById('hp-nasabah').value,
+                nominal_pengajuan: document.getElementById('nominal-pengajuan').value,
+            };
+
+            const { error } = await supabase.from('referrals').insert([newData]);
+
+            btn.innerHTML = 'Ajukan Data'; btn.disabled = false;
+
+            if (error) {
+                alert('Gagal menyimpan data: ' + error.message);
+            } else {
+                alert('Berhasil diajukan!');
+                document.getElementById('form-tambah-data').reset();
+                loadData(); // Refresh tabel
+            }
+        });
+
+        // Update Data (Admin PGD)
+        window.updateDataAdmin = async (id) => {
+            const statusVal = document.getElementById(`status-${id}`).value;
+            const cairVal = document.getElementById(`cair-${id}`).value;
+
+            const { error } = await supabase
+                .from('referrals')
+                .update({ 
+                    status: statusVal, 
+                    nominal_pencairan: statusVal === 'Cair' ? cairVal : 0 // Paksa 0 jika tidak cair
+                })
+                .eq('id', id);
+
+            if (error) {
+                alert('Gagal update: ' + error.message);
+            } else {
+                alert('Data berhasil diupdate!');
+                loadData();
+            }
+        };
+
+        // Jalankan saat halaman dibuka
+        window.onload = init;
+
+    </script>
+</body>
+</html>
