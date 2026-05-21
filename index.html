@@ -9,7 +9,6 @@
     <!-- Supabase JS CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Sembunyikan elemen secara default untuk SPA */
         .hidden-section { display: none; }
         .spinner { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle;}
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -22,24 +21,24 @@
         <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border border-gray-100">
             <div class="text-center mb-8">
                 <h1 class="text-2xl font-bold text-blue-800">Portal Pegadaian</h1>
-                <p class="text-sm text-gray-500 mt-2">Login dengan Email Corporate Anda</p>
+                <p class="text-sm text-gray-500 mt-2">Login dengan Email Anda</p>
             </div>
 
             <!-- Form Minta OTP -->
             <form id="form-email" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700">Email Corporate (@pegadaian.co.id)</label>
-                    <input type="email" id="input-email" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="nama@pegadaian.co.id">
+                    <label class="block text-sm font-medium text-gray-700">Email Login</label>
+                    <input type="email" id="input-email" required class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="contoh@gmail.com">
                 </div>
                 <button type="submit" id="btn-send-otp" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition">
                     Kirim Kode OTP
                 </button>
             </form>
 
-            <!-- Form Verifikasi OTP (Muncul setelah email dikirim) -->
+            <!-- Form Verifikasi OTP -->
             <form id="form-otp" class="space-y-4 hidden mt-4">
                 <div class="bg-green-50 p-3 rounded text-sm text-green-700 border border-green-200">
-                    OTP telah dikirim ke email Anda. Cek kotak masuk atau folder spam.
+                    OTP telah dikirim ke email Anda. <b>Cek Inbox / Folder SPAM.</b>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Kode OTP (6 Digit)</label>
@@ -54,7 +53,6 @@
 
     <!-- BAGIAN 2: DASHBOARD UTAMA -->
     <div id="app-section" class="hidden-section">
-        <!-- Navbar -->
         <nav class="bg-blue-800 shadow-md p-4">
             <div class="container mx-auto flex justify-between items-center">
                 <div class="text-white font-bold text-xl tracking-wide">PGD Portal</div>
@@ -67,8 +65,7 @@
         </nav>
 
         <main class="container mx-auto p-4 md:p-6 mt-4 space-y-6">
-            
-            <!-- FORM INPUT SALES (Akan disembunyikan untuk Admin) -->
+            <!-- FORM INPUT SALES -->
             <div id="sales-form-container" class="bg-white p-6 rounded-xl shadow border border-gray-100">
                 <h2 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">Form Data Referral Nasabah</h2>
                 <form id="form-tambah-data" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -105,20 +102,12 @@
                         <thead class="bg-gray-100 text-gray-600 uppercase">
                             <tr>
                                 <th class="p-3 border-b">No</th>
-                                <!-- Kolom Admin -->
                                 <th class="p-3 border-b bg-red-100 text-red-800 hidden admin-col">Nama Sales</th>
                                 <th class="p-3 border-b bg-red-100 text-red-800 hidden admin-col">No HP Sales</th>
-                                
-                                <!-- Kolom Umum -->
                                 <th class="p-3 border-b">Nama Nasabah</th>
                                 <th class="p-3 border-b">No HP Nasabah</th>
-                                
-                                <!-- Kolom Admin -->
                                 <th class="p-3 border-b bg-red-100 text-red-800 hidden admin-col">KTP Nasabah</th>
-                                
                                 <th class="p-3 border-b">Pengajuan (Rp)</th>
-                                
-                                <!-- Kolom Status & Pencairan -->
                                 <th class="p-3 border-b bg-blue-100 text-blue-800">Status</th>
                                 <th class="p-3 border-b bg-blue-100 text-blue-800">Pencairan (Rp)</th>
                                 <th class="p-3 border-b hidden admin-col">Aksi</th>
@@ -141,7 +130,8 @@
         const SUPABASE_URL = 'https://yykyrdtbtnzkczqvlwdd.supabase.co'; // GANTI INI
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5a3lyZHRidG56a2N6cXZsd2RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzMjY0ODcsImV4cCI6MjA5NDkwMjQ4N30.dHHRKZE3Oo8vdAn4kVLy3dxJpnyWfMwKtbhGgZvJQvg'; // GANTI INI
 
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // MENGUBAH NAMA VARIABEL MENJADI supabaseClient AGAR TIDAK ERROR
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // ==========================================
         // 2. STATE APLIKASI
@@ -150,29 +140,26 @@
         let currentRole = 'sales';
         let savedEmailForOtp = '';
 
-        // DOM Elements
         const elLoginSection = document.getElementById('login-section');
         const elAppSection = document.getElementById('app-section');
         const elFormEmail = document.getElementById('form-email');
         const elFormOtp = document.getElementById('form-otp');
         const elSalesFormContainer = document.getElementById('sales-form-container');
 
-        // Format Rupiah Helper
         const formatRp = (angka) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka);
 
         // ==========================================
         // 3. INIT & AUTENTIKASI
         // ==========================================
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             if (session) {
                 await setupUser(session.user);
             } else {
                 showSection('login');
             }
 
-            // Setup Auth Listener (kalau token expired dll)
-            supabase.auth.onAuthStateChange((event, session) => {
+            supabaseClient.auth.onAuthStateChange((event, session) => {
                 if (event === 'SIGNED_OUT') showSection('login');
             });
         }
@@ -185,19 +172,16 @@
         async function setupUser(user) {
             currentUser = user;
             
-            // Ambil role dari tabel profiles
-            const { data, error } = await supabase.from('profiles').select('role, nama_lengkap').eq('id', user.id).single();
+            const { data, error } = await supabaseClient.from('profiles').select('role, nama_lengkap').eq('id', user.id).single();
             currentRole = data ? data.role : 'sales';
             const nama = data?.nama_lengkap || user.email;
 
-            // Update UI
             document.getElementById('user-info').innerText = `${nama} (${user.email})`;
             document.getElementById('role-badge').innerText = currentRole;
             document.getElementById('role-badge').className = currentRole === 'admin' 
                 ? 'px-2 py-1 text-xs font-bold rounded bg-red-500 text-white uppercase' 
                 : 'px-2 py-1 text-xs font-bold rounded bg-blue-500 text-white uppercase';
 
-            // Sembunyikan/Tampilkan Form Sales & Kolom Tabel berdasarkan Role
             if (currentRole === 'admin') {
                 elSalesFormContainer.style.display = 'none';
                 document.getElementById('table-title').innerText = 'Dashboard INTERNAL (Petugas PGD)';
@@ -219,10 +203,12 @@
             const email = document.getElementById('input-email').value;
             btn.innerHTML = '<span class="spinner"></span> Mengirim...'; btn.disabled = true;
 
-            const { error } = await supabase.auth.signInWithOtp({ email: email });
+            const { error } = await supabaseClient.auth.signInWithOtp({ email: email });
+            
             btn.innerHTML = 'Kirim Kode OTP'; btn.disabled = false;
 
             if (error) {
+                console.error("Error Auth:", error);
                 alert('Gagal mengirim OTP: ' + error.message);
             } else {
                 savedEmailForOtp = email;
@@ -238,10 +224,10 @@
             const otp = document.getElementById('input-otp').value;
             btn.innerHTML = '<span class="spinner"></span> Verifikasi...'; btn.disabled = true;
 
-            const { data: { session }, error } = await supabase.auth.verifyOtp({
+            const { data: { session }, error } = await supabaseClient.auth.verifyOtp({
                 email: savedEmailForOtp,
                 token: otp,
-                type: 'magiclink' // Type OTP
+                type: 'magiclink'
             });
 
             btn.innerHTML = 'Verifikasi & Masuk'; btn.disabled = false;
@@ -254,7 +240,7 @@
         });
 
         async function logout() {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
             window.location.reload();
         }
 
@@ -262,13 +248,11 @@
         // 4. DATABASE / CRUD LOGIC
         // ==========================================
         
-        // Load Data Table
         async function loadData() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '<tr><td colspan="10" class="p-6 text-center text-gray-500"><span class="spinner"></span> Mengambil data...</td></tr>';
 
-            // Query: Join dengan profiles untuk mengambil data sales (hanya jalan jika Admin RLS membolehkan)
-            const { data, error } = await supabase
+            const { data, error } = await supabaseClient
                 .from('referrals')
                 .select(`*, profiles(nama_lengkap, no_hp)`)
                 .order('created_at', { ascending: false });
@@ -288,12 +272,10 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-gray-50 transition';
 
-                // Status Badge Color
                 let statusBadge = 'bg-yellow-100 text-yellow-800';
                 if(row.status === 'Cair') statusBadge = 'bg-green-100 text-green-800';
                 if(row.status === 'Ditolak') statusBadge = 'bg-red-100 text-red-800';
 
-                // Logika rendering kolom berdasarkan Role
                 if (currentRole === 'admin') {
                     tr.innerHTML = `
                         <td class="p-3">${index + 1}</td>
@@ -333,7 +315,6 @@
             });
         }
 
-        // Submit Data Baru (Sales)
         document.getElementById('form-tambah-data').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btn-submit-data');
@@ -347,7 +328,7 @@
                 nominal_pengajuan: document.getElementById('nominal-pengajuan').value,
             };
 
-            const { error } = await supabase.from('referrals').insert([newData]);
+            const { error } = await supabaseClient.from('referrals').insert([newData]);
 
             btn.innerHTML = 'Ajukan Data'; btn.disabled = false;
 
@@ -356,20 +337,19 @@
             } else {
                 alert('Berhasil diajukan!');
                 document.getElementById('form-tambah-data').reset();
-                loadData(); // Refresh tabel
+                loadData();
             }
         });
 
-        // Update Data (Admin PGD)
         window.updateDataAdmin = async (id) => {
             const statusVal = document.getElementById(`status-${id}`).value;
             const cairVal = document.getElementById(`cair-${id}`).value;
 
-            const { error } = await supabase
+            const { error } = await supabaseClient
                 .from('referrals')
                 .update({ 
                     status: statusVal, 
-                    nominal_pencairan: statusVal === 'Cair' ? cairVal : 0 // Paksa 0 jika tidak cair
+                    nominal_pencairan: statusVal === 'Cair' ? cairVal : 0
                 })
                 .eq('id', id);
 
@@ -381,7 +361,6 @@
             }
         };
 
-        // Jalankan saat halaman dibuka
         window.onload = init;
 
     </script>
