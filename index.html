@@ -227,7 +227,7 @@
             const { data: { session }, error } = await supabaseClient.auth.verifyOtp({
                 email: savedEmailForOtp,
                 token: otp,
-                type: 'magiclink'
+                type: 'email'
             });
 
             btn.innerHTML = 'Verifikasi & Masuk'; btn.disabled = false;
