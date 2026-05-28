@@ -100,7 +100,6 @@
             <!-- SLIDE 2: FORM DAFTAR / SIGN UP -->
             <div id="form-signup-container" class="hidden animate-fade-in">
                 <form id="form-signup-main" class="space-y-4" onsubmit="return false;">
-                    <!-- Step 1: Input Email & Password -->
                     <div id="signup-step-1" class="space-y-4 animate-fade-in">
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Email Kerja</label>
@@ -115,7 +114,6 @@
                         </button>
                     </div>
 
-                    <!-- Step 2: Input OTP Verification -->
                     <div id="signup-step-2" class="hidden space-y-4 animate-fade-in">
                         <div class="bg-indigo-50/50 p-3 rounded-xl text-[11px] text-indigo-800 border border-indigo-100/50 leading-relaxed">
                             Silakan masukkan kode OTP yang telah dikirimkan ke kotak masuk email kerja Anda.
@@ -134,7 +132,6 @@
             <!-- SLIDE 3: FORM LUPA PASSWORD -->
             <div id="form-forgot-container" class="hidden animate-fade-in">
                 <form id="form-forgot-main" class="space-y-4" onsubmit="return false;">
-                    <!-- Step 1: Input Email -->
                     <div id="forgot-step-1" class="space-y-4 animate-fade-in">
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Email Kerja</label>
@@ -145,7 +142,6 @@
                         </button>
                     </div>
 
-                    <!-- Step 2: Input OTP & Password Baru -->
                     <div id="forgot-step-2" class="hidden space-y-4 animate-fade-in">
                         <div class="bg-amber-50/50 p-3 rounded-xl text-[11px] text-amber-800 border border-amber-100/50 leading-relaxed">
                             Masukkan kode OTP pemulihan dan ketik password baru untuk akun Anda.
@@ -187,6 +183,22 @@
         </nav>
 
         <main class="max-w-7xl mx-auto px-6 py-8">
+            <!-- RINGKASAN STATISTIK (FITUR PENDUKUNG) -->
+            <div id="stats-container" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fade-in">
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.01)] flex flex-col justify-between">
+                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Total Pengajuan</span>
+                    <span id="stat-total" class="text-2xl font-bold text-slate-900">0</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.01)] flex flex-col justify-between">
+                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Rujukan Cair</span>
+                    <span id="stat-cair" class="text-2xl font-bold text-emerald-600">0</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.01)] flex flex-col justify-between">
+                    <span class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 block">Total Akumulasi Pencairan</span>
+                    <span id="stat-nominal" class="text-2xl font-bold text-slate-950">Rp 0</span>
+                </div>
+            </div>
+
             <!-- Grid Layout Interaktif -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                 
@@ -221,9 +233,24 @@
 
                 <!-- TABEL DATA / DASHBOARD VIEW (2/3 Kolom atau Full Width) -->
                 <div id="table-container" class="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.01)] overflow-hidden animate-fade-in">
-                    <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                    <div class="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                         <h2 class="text-sm font-semibold text-slate-900 tracking-tight" id="table-title">Daftar Pengajuan</h2>
-                        <button onclick="loadData()" class="text-xs font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/50 px-3 py-1.5 rounded-lg transition-all duration-200">↻ Segarkan Data</button>
+                        
+                        <!-- Panel Filter & Actions -->
+                        <div class="flex items-center gap-2 self-stretch sm:self-auto justify-end">
+                            <!-- Tombol Pop-up Filter Tanggal -->
+                            <button onclick="toggleDateModal(true)" id="btn-date-filter" class="text-xs font-medium text-slate-600 hover:text-indigo-600 bg-slate-50 hover:bg-indigo-50/50 border border-slate-200/60 px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                <span id="date-filter-label">Filter Tanggal</span>
+                            </button>
+                            <!-- Ekspor CSV -->
+                            <button onclick="exportCSV()" class="text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 px-3 py-1.5 rounded-lg transition-all duration-200 flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Ekspor CSV
+                            </button>
+                            <!-- Segarkan -->
+                            <button onclick="loadData()" class="text-xs font-medium text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/50 px-3 py-1.5 rounded-lg transition-all duration-200">Segarkan</button>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left text-sm whitespace-nowrap">
@@ -256,6 +283,32 @@
         </main>
     </div>
 
+    <!-- POP-UP MODAL FILTER TANGGAL -->
+    <div id="date-filter-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[100] animate-fade-in p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-xl border border-slate-100 w-full max-w-sm">
+            <div class="flex justify-between items-center mb-5 pb-2 border-b border-slate-50">
+                <h3 class="text-sm font-semibold text-slate-900">Filter Berdasarkan Rentang Tanggal</h3>
+                <button onclick="toggleDateModal(false)" class="text-slate-400 hover:text-slate-600 outline-none">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tanggal Mulai</label>
+                    <input type="date" id="filter-start-date" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none text-sm text-slate-800">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Tanggal Selesai</label>
+                    <input type="date" id="filter-end-date" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:ring-4 focus:ring-indigo-600/10 focus:border-indigo-600 transition-all outline-none text-sm text-slate-800">
+                </div>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="clearDateFilter()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 rounded-xl transition-all duration-150 text-xs">Reset</button>
+                <button onclick="applyDateFilter()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-xl transition-all duration-150 text-xs shadow-sm shadow-indigo-600/10">Terapkan</button>
+            </div>
+        </div>
+    </div>
+
     <!-- LOGIKA JAVASCRIPT -->
     <script>
         const SUPABASE_URL = 'https://yykyrdtbtnzkczqvlwdd.supabase.co'; 
@@ -265,6 +318,11 @@
 
         let currentUser = null;
         let currentRole = 'sales';
+        let currentLoadedData = []; // Menyimpan data aktif yang termuat
+
+        // Parameter filter tanggal global
+        let dateStart = '';
+        let dateEnd = '';
 
         const elLoginSection = document.getElementById('login-section');
         const elAppSection = document.getElementById('app-section');
@@ -295,10 +353,9 @@
             elAppSection.style.display = section === 'app' ? 'block' : 'none';
         }
 
-       // FUNGSI VALIDASI DOMAIN EMAIL (Disesuaikan untuk keperluan testing)
+        // FUNGSI VALIDASI EMAIL (DIUBAH UNTUK TESTING: MENERIMA APA SAJA YANG MEMILIKI KARAKTER @)
         function validateEmailDomain(email) {
             const emailLower = email.trim().toLowerCase();
-            // Menerima semua email selama memiliki format dasar dengan karakter '@'
             const isValid = emailLower.includes('@');
             if (!isValid) {
                 alert('Gagal: email tidak valid');
@@ -383,7 +440,6 @@
             if (error) {
                 alert('Gagal daftar: ' + error.message);
             } else {
-                // Tampilkan form verifikasi OTP langkah kedua
                 document.getElementById('signup-step-1').classList.add('hidden');
                 document.getElementById('signup-step-2').classList.remove('hidden');
             }
@@ -438,7 +494,6 @@
             if (error) {
                 alert('Gagal mengirim email pemulihan: ' + error.message);
             } else {
-                // Tampilkan form verifikasi & pembuatan password baru langkah kedua
                 document.getElementById('forgot-step-1').classList.add('hidden');
                 document.getElementById('forgot-step-2').classList.remove('hidden');
             }
@@ -458,7 +513,6 @@
 
             btn.innerHTML = '<span class="spinner mr-2"></span> Memperbarui...'; btn.disabled = true;
 
-            // 1. Verifikasi kode OTP pemulihan terlebih dahulu
             const { data: { session }, error: verifyError } = await supabaseClient.auth.verifyOtp({
                 email: email,
                 token: otp,
@@ -471,7 +525,6 @@
                 return;
             }
 
-            // 2. Jika OTP valid, perbarui kata sandi pengguna langsung
             const { error: updateError } = await supabaseClient.auth.updateUser({
                 password: newPassword
             });
@@ -482,11 +535,11 @@
                 alert('Gagal mengubah password: ' + updateError.message);
             } else {
                 alert('Password berhasil diperbarui!');
-                // Pengguna langsung diarahkan ke dalam sistem secara otomatis
                 await setupUser(session.user);
             }
         }
 
+        // PENGATURAN USER & HAK AKSES VIEW
         async function setupUser(user) {
             currentUser = user;
             
@@ -496,7 +549,6 @@
 
             document.getElementById('user-info').innerText = `${nama} (${user.email})`;
             
-            // Pengaturan Role Badge Minimalis
             const badge = document.getElementById('role-badge');
             badge.innerText = currentRole;
             badge.className = currentRole === 'admin' 
@@ -507,11 +559,15 @@
                 elSalesFormContainer.style.display = 'none';
                 elTableContainer.className = 'lg:col-span-3 bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.01)] overflow-hidden animate-fade-in';
                 document.getElementById('table-title').innerText = 'Dashboard Internal PGD (Administrator)';
+                
+                // Tampilkan semua kolom admin secara implisit
                 document.querySelectorAll('.admin-col').forEach(el => el.classList.remove('hidden'));
             } else {
                 elSalesFormContainer.style.display = 'block';
                 elTableContainer.className = 'lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.01)] overflow-hidden animate-fade-in';
                 document.getElementById('table-title').innerText = 'Data Pengajuan Referral Anda';
+                
+                // Sembunyikan kolom admin jika status login adalah sales
                 document.querySelectorAll('.admin-col').forEach(el => el.classList.add('hidden'));
             }
 
@@ -524,23 +580,126 @@
             window.location.reload();
         }
 
-        // DATABASE / CRUD LOGIC
+        // FUNGSI POP-UP MODAL FILTER TANGGAL
+        function toggleDateModal(show) {
+            const modal = document.getElementById('date-filter-modal');
+            if (show) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function applyDateFilter() {
+            dateStart = document.getElementById('filter-start-date').value;
+            dateEnd = document.getElementById('filter-end-date').value;
+
+            const label = document.getElementById('date-filter-label');
+            if (dateStart && dateEnd) {
+                label.innerText = `${dateStart} s/d ${dateEnd}`;
+                label.classList.add('text-indigo-600', 'font-semibold');
+            } else {
+                label.innerText = "Filter Tanggal";
+                label.classList.remove('text-indigo-600', 'font-semibold');
+            }
+            toggleDateModal(false);
+            loadData();
+        }
+
+        function clearDateFilter() {
+            document.getElementById('filter-start-date').value = '';
+            document.getElementById('filter-end-date').value = '';
+            dateStart = '';
+            dateEnd = '';
+            
+            const label = document.getElementById('date-filter-label');
+            label.innerText = "Filter Tanggal";
+            label.classList.remove('text-indigo-600', 'font-semibold');
+            
+            toggleDateModal(false);
+            loadData();
+        }
+
+        // FUNGSI EKSPOR KE CSV (FITUR PENDUKUNG)
+        function exportCSV() {
+            if (currentLoadedData.length === 0) {
+                alert('Tidak ada data untuk diekspor!');
+                return;
+            }
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            // Header baris CSV
+            csvContent += "No,Nama Sales,No HP Sales,Nama Nasabah,No HP Nasabah,No KTP Nasabah,Nominal Pengajuan,Status,Nominal Pencairan\n";
+
+            currentLoadedData.forEach((row, index) => {
+                const salesName = row.profiles?.nama_lengkap || "-";
+                const salesHp = row.profiles?.no_hp || "-";
+                const rowData = [
+                    index + 1,
+                    `"${salesName}"`,
+                    `"${salesHp}"`,
+                    `"${row.nama_nasabah}"`,
+                    `"${row.no_hp_nasabah}"`,
+                    `"${row.ktp_nasabah}"`,
+                    row.nominal_pengajuan,
+                    `"${row.status}"`,
+                    row.nominal_pencairan
+                ].join(",");
+                csvContent += rowData + "\n";
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Data_Referral_PGD_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // DATABASE / CRUD LOGIC (DENGAN FILTER HAK AKSES DAN FILTER TANGGAL)
         async function loadData() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '<tr><td colspan="10" class="p-12 text-center text-slate-400"><span class="spinner mr-2"></span> Mengambil data...</td></tr>';
 
-            const { data, error } = await supabaseClient
+            // Inisialisasi Kueri Supabase
+            let query = supabaseClient
                 .from('referrals')
-                .select(`*, profiles(nama_lengkap, no_hp)`)
-                .order('created_at', { ascending: false });
+                .select(`*, profiles(nama_lengkap, no_hp)`);
+
+            // Hak Akses: Jika user berstatus 'sales', batasi data hanya miliknya sendiri
+            if (currentRole !== 'admin') {
+                query = query.eq('sales_id', currentUser.id);
+            }
+
+            // Filter Berdasarkan Range Tanggal (Jika Dipilih)
+            if (dateStart) {
+                query = query.gte('created_at', `${dateStart}T00:00:00.000Z`);
+            }
+            if (dateEnd) {
+                query = query.lte('created_at', `${dateEnd}T23:59:59.999Z`);
+            }
+
+            const { data, error } = await query.order('created_at', { ascending: false });
 
             if (error) {
                 tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-rose-500 font-medium">Error: ${error.message}</td></tr>`;
                 return;
             }
 
+            currentLoadedData = data; // Simpan ke variabel global untuk keperluan ekspor CSV
+
+            // Hitung dan Perbarui Ringkasan Statistik
+            const totalPengajuan = data.length;
+            const rujukanCair = data.filter(r => r.status === 'Cair').length;
+            const nominalPencairan = data.reduce((acc, curr) => acc + (curr.nominal_pencairan || 0), 0);
+
+            document.getElementById('stat-total').innerText = totalPengajuan;
+            document.getElementById('stat-cair').innerText = rujukanCair;
+            document.getElementById('stat-nominal').innerText = formatRp(nominalPencairan);
+
             if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="p-12 text-center text-slate-400 font-medium">Belum ada data pengajuan.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="10" class="p-12 text-center text-slate-400 font-medium">Belum ada data pengajuan dalam rentang filter ini.</td></tr>';
                 return;
             }
 
@@ -553,6 +712,7 @@
                 if(row.status === 'Cair') statusBadge = 'bg-emerald-50 text-emerald-700 border border-emerald-100/70';
                 if(row.status === 'Ditolak') statusBadge = 'bg-rose-50 text-rose-700 border border-rose-100/70';
 
+                // Hak Akses View: Jika 'admin' login, tampilkan tombol aksi edit [1].
                 if (currentRole === 'admin') {
                     tr.innerHTML = `
                         <td class="p-4 pl-6 text-slate-400">${index + 1}</td>
@@ -577,6 +737,7 @@
                         </td>
                     `;
                 } else {
+                    // Jika 'sales' login, sembunyikan kolom aksi edit [1].
                     tr.innerHTML = `
                         <td class="p-4 pl-6 text-slate-400">${index + 1}</td>
                         <td class="p-4 font-semibold text-slate-900">${row.nama_nasabah}</td>
@@ -644,6 +805,10 @@
         window.signUpStep2 = signUpStep2;
         window.forgotStep1 = forgotStep1;
         window.forgotStep2 = forgotStep2;
+        window.toggleDateModal = toggleDateModal;
+        window.applyDateFilter = applyDateFilter;
+        window.clearDateFilter = clearDateFilter;
+        window.exportCSV = exportCSV;
 
         window.onload = init;
     </script>
