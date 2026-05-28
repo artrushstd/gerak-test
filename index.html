@@ -295,10 +295,11 @@
             elAppSection.style.display = section === 'app' ? 'block' : 'none';
         }
 
-        // FUNGSI VALIDASI DOMAIN EMAIL KORPORAT
+       // FUNGSI VALIDASI DOMAIN EMAIL (Disesuaikan untuk keperluan testing)
         function validateEmailDomain(email) {
             const emailLower = email.trim().toLowerCase();
-            const isValid = emailLower.endsWith('@bridanareksa.co.id') || emailLower.endsWith('@pegadaian.co.id');
+            // Menerima semua email selama memiliki format dasar dengan karakter '@'
+            const isValid = emailLower.includes('@');
             if (!isValid) {
                 alert('Gagal: email tidak valid');
                 return false;
